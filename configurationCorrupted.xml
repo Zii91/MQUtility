@@ -1,0 +1,30 @@
+<configuration>
+  <service>
+    <ServiceID>Service1</ServiceID>
+    <queueManager>DefaultQueueManager</queueManager>
+    <queues>
+      <queue>
+        <logicalName>Queue11</logicalName>
+        <physicalName>MQQUEUE11</physicalName>
+      </queue>
+      <queue>
+        <logicalName>Queue2</logicalName>
+        <physicalName>MQQUE12</physicalName>
+      </queue>
+    </queues>
+  </service>
+  <service>
+    <ServiceID>Service2</ServiceID>
+    <queueManager>DefaultQueueManager</queueManager>
+    <queues>
+      <queue>
+        <logicalName>Queue21</logicalName>
+        <physicalName>MQQUEUE21</physicalName>
+      </queue>
+      <queue>
+        <logicalName>Queue2</logicalName>
+        <physicalName>MQQUE22</physicalName>
+      </queue>
+    </queues>
+  </service>
+</configuration>
