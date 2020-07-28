@@ -3,12 +3,12 @@
 #include <vector>
 #include <string>
 #include "Service.h"
-#include "IConfigurationSource.h"
+#include "ConfigurationSource.h"
 #include "tinyxml2.h"
 using namespace std;
 
 
-class XMLFileConfiguration: public IConfigurationSource
+class XMLFileConfiguration: public ConfigurationSource
 {
   string configFile;
   Service* parseServiceElement(tinyxml2::XMLElement &pElement);

@@ -16,11 +16,12 @@ namespace MQUtility
 
       std::string configurationFile;
       std::string serviceName;
+      MQClient* mqClient;
 
-      IConfigurationSource* configuration;
+      ConfigurationSource* configuration;
       int mode;
       void init();
-      void checkConfiguration();
+      int checkConfiguration();
       void initWithXMLSource();
       void initWithDBSource();
       void initAPISource();
@@ -28,7 +29,9 @@ namespace MQUtility
     public:
       MQUtility(std::string const &filename, int const& mode);
       MQUtility(std::string const &filename, string const& serviceName, int const& mode);
-      void run();
+      MQClient* getMQClient();
+      void setMQClient(MQClient* const& mqClient);
+      int run();
       void printConfiguration();
   };
 }

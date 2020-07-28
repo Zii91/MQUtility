@@ -14,10 +14,10 @@ MQUtility::MQUtility::MQUtility(std::string const &filename, string const &servi
   this->serviceName = serviceName;
 };
 
-void MQUtility::MQUtility::run()
+int MQUtility::MQUtility::run()
 {
   init();
-  checkConfiguration();
+  return checkConfiguration();
 };
 
 void MQUtility::MQUtility::init()
@@ -46,7 +46,7 @@ void MQUtility::MQUtility::initWithXMLSource()
   }
 };
 
-void MQUtility::MQUtility::checkConfiguration()
+int MQUtility::MQUtility::checkConfiguration()
 {
 
   if (serviceName.length() != 0)
@@ -55,14 +55,36 @@ void MQUtility::MQUtility::checkConfiguration()
     Service *s{configuration->getServiceConfiguration(serviceName)};
     const std::string queueManager{s->getQueueManager()};
     std::cout << "MQ Queue Manager = " << queueManager << " for above service" << std::endl;
-    MQClient client;
-    if (client.initialise(queueManager)){
-      MQConnection* mqc{client.connect(queueManager)};
+    if (mqClient->initialise(queueManager))
+    {
+      MQConnection *connection{mqClient->connect(queueManager)};
+      if (connection->getReturnCode() != true)
+      {
+        return -1;
+      }
+      for (std::pair<std::string, std::string> element : s->getQueueMap())
+      {
+        if (mqClient->openQueueConnection(connection, element.second) != true)
+        {
+          std::cout << "MQ_FAILURE for queue" << element.first << std::endl;
+          return -1;
+        }
+        else
+        {
+          mqClient->closeQueueConnection(connection, element.second);
+        }
+      }
+      mqClient->closeManagerConnection(connection);
       std::cout << "MQ_SUCCESS" << std::endl;
-    }else{
+      return 1;
+    }
+    else
+    {
       std::cout << "MQ_FAILURE" << std::endl;
+      return -1;
     }
   }
+  return 1;
 };
 
 void MQUtility::MQUtility::printConfiguration()
@@ -79,4 +101,13 @@ void MQUtility::MQUtility::printConfiguration()
       cout << *s;
     }
   }
+};
+
+MQClient *MQUtility::MQUtility::getMQClient()
+{
+  return mqClient;
+};
+void MQUtility::MQUtility::setMQClient(MQClient *const &mqClient)
+{
+  this->mqClient = mqClient;
 };

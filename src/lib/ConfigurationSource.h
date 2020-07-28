@@ -1,7 +1,7 @@
 #include "Service.h"
 #include <string>
 using namespace std;
-class IConfigurationSource
+class ConfigurationSource
 {
   public:
   virtual void loadConfiguration() = 0;

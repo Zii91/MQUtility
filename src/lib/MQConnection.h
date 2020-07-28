@@ -2,7 +2,7 @@
 #include <string>
 
 class MQConnection{
-  bool returnCode;
+  bool returnCode=true;
   public:
     MQConnection();
     virtual bool getReturnCode() const;
