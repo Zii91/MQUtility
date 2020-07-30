@@ -1,49 +1,17 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "type": "shell",
-            "label": "clang++ build active file",
-            "command": "/usr/bin/clang++",
-            "args": [
-                "-std=c++11",
-                "-stdlib=libc++",
-                "-g",
-                "${workspaceFolder}/src/*.cpp",
-                "-o",
-                "${workspaceFolder}/build/MQUtility"
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-        {
-            "type": "shell",
-            "label": "C/C++: clang++ build active file",
-            "command": "/usr/bin/clang++",
-            "args": [
-                "-g",
-                "${file}",
-                "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        }
-    ]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build MQChecker (Debug)",
+      "type": "shell",
+      "command": "bazel build //src/main:MQChecker -c dbg --coverage",
+      "osx": {
+        "command": "bazel build //src/main:MQChecker -c dbg --spawn_strategy=standalone --coverage",
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+    }
+  ]
 }

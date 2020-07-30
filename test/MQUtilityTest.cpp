@@ -1,8 +1,9 @@
-#include "gtest/gtest.h"
 #include "src/lib/MQUtility.h"
-#include "src/lib/XMLFileConfiguration.h"
 #include "MockMQClient.h"
 #include <string>
+#include <stdlib.h>
+#include <time.h>
+#include "gtest/gtest.h"
 
 TEST(MQUtilityInitializationShould, ReturnSameServiceNameFromXMLFile){
   XMLFileConfiguration *cfg = new XMLFileConfiguration("/Users/Zied/Projects/STAR-MQ-Utility/configuration.xml");
@@ -78,15 +79,94 @@ TEST(MQUtilityInitializationShould, CatchExceptionXMLFileCorrupted){
 
 
 
-TEST(MQUtilityCheckingShould, accessAllConfigurationQueues){
+TEST(MQUtilityCheckingShould, accessAllConfigurationQueuesForOneService){
   testing::NiceMock<MockMQClient> client;
+  srand(time(NULL));
   MQConnection* connection = new MQConnection();
   ON_CALL(client, initialise(testing::_)).WillByDefault(testing::Return(true));
   ON_CALL(client, connect(testing::_)).WillByDefault(testing::Return(connection));
   ON_CALL(client, openQueueConnection(connection,testing::_)).WillByDefault(testing::Return(true));
-  ON_CALL(client, getQueueDepth(connection,testing::_)).WillByDefault(testing::Return(testing::AnyNumber));
+  ON_CALL(client, getQueueDepth(connection,testing::_)).WillByDefault(testing::Return(std::make_pair(true,(rand() % 100))));
   MQUtility::MQUtility* util = new MQUtility::MQUtility("/Users/Zied/Projects/STAR-MQ-Utility/configuration.xml","Service1",MQUtility::XML_MODE);
+  util->init();
   util->setMQClient(&client);
-  int rc = util->run();
+  int rc = util->checkConfiguration();
   EXPECT_EQ(rc,1);
+};
+
+TEST(MQUtilityCheckingShould, accessAllConfigurationQueuesForAllServices){
+  testing::NiceMock<MockMQClient> client;
+  srand(time(NULL));
+  MQConnection* connection = new MQConnection();
+  ON_CALL(client, initialise(testing::_)).WillByDefault(testing::Return(true));
+  ON_CALL(client, connect(testing::_)).WillByDefault(testing::Return(connection));
+  ON_CALL(client, openQueueConnection(connection,testing::_)).WillByDefault(testing::Return(true));
+  ON_CALL(client, getQueueDepth(connection,testing::_)).WillByDefault(testing::Return(std::make_pair(true,(rand() % 100))));
+  MQUtility::MQUtility* util = new MQUtility::MQUtility("/Users/Zied/Projects/STAR-MQ-Utility/configuration.xml",MQUtility::XML_MODE);
+  util->init();
+  util->setMQClient(&client);
+  int rc = util->checkConfiguration();
+  EXPECT_EQ(rc,1);
+};
+
+TEST(MQUtilityCheckingShould, cannotInitialiseClient){
+  testing::NiceMock<MockMQClient> client;
+  ON_CALL(client, initialise(testing::_)).WillByDefault(testing::Return(false));
+  MQUtility::MQUtility* util = new MQUtility::MQUtility("/Users/Zied/Projects/STAR-MQ-Utility/configuration.xml","Service1",MQUtility::XML_MODE);
+  util->init();
+  util->setMQClient(&client);
+  int rc = util->checkConfiguration();
+  EXPECT_EQ(rc,-1);
+};
+
+TEST(MQUtilityCheckingShould, cannotConnectClient){
+  testing::NiceMock<MockMQClient> client;
+  MQConnection* connection = new MQConnection();
+  connection->setReturnCode(false);
+  ON_CALL(client, initialise(testing::_)).WillByDefault(testing::Return(true));
+  ON_CALL(client, connect(testing::_)).WillByDefault(testing::Return(connection));
+  MQUtility::MQUtility* util = new MQUtility::MQUtility("/Users/Zied/Projects/STAR-MQ-Utility/configuration.xml","Service1",MQUtility::XML_MODE);
+  util->init();
+  util->setMQClient(&client);
+  int rc = util->checkConfiguration();
+  EXPECT_EQ(rc,-1);
+};
+
+TEST(MQUtilityCheckingShould, cannotOpenConnectionToQueue){
+  testing::NiceMock<MockMQClient> client;
+  MQConnection* connection = new MQConnection();
+  ON_CALL(client, initialise(testing::_)).WillByDefault(testing::Return(true));
+  ON_CALL(client, connect(testing::_)).WillByDefault(testing::Return(connection));
+  ON_CALL(client, openQueueConnection(connection,testing::_)).WillByDefault(testing::Return(false));
+  MQUtility::MQUtility* util = new MQUtility::MQUtility("/Users/Zied/Projects/STAR-MQ-Utility/configuration.xml","Service1",MQUtility::XML_MODE);
+  util->init();
+  util->setMQClient(&client);
+  int rc = util->checkConfiguration();
+  EXPECT_EQ(rc,-1);
+};
+
+TEST(MQUtilityCheckingShould, cannotOpenConnectionToOneOfTheQueues){
+  testing::NiceMock<MockMQClient> client;
+  MQConnection* connection = new MQConnection();
+  ON_CALL(client, initialise(testing::_)).WillByDefault(testing::Return(true));
+  ON_CALL(client, connect(testing::_)).WillByDefault(testing::Return(connection));
+  EXPECT_CALL(client, openQueueConnection(connection,testing::_)).Times(2).WillOnce(testing::Return(false)).WillOnce(testing::Return(true));
+  MQUtility::MQUtility* util = new MQUtility::MQUtility("/Users/Zied/Projects/STAR-MQ-Utility/configuration.xml","Service1",MQUtility::XML_MODE);
+  util->init();
+  util->setMQClient(&client);
+  int rc = util->checkConfiguration();
+  EXPECT_EQ(rc,-1);
+};
+
+TEST(MQUtilityCheckingShould, cannotOpenConnectionToOneOfTheQueues2){
+  testing::NiceMock<MockMQClient> client;
+  MQConnection* connection = new MQConnection();
+  ON_CALL(client, initialise(testing::_)).WillByDefault(testing::Return(true));
+  ON_CALL(client, connect(testing::_)).WillByDefault(testing::Return(connection));
+  EXPECT_CALL(client, openQueueConnection(connection,testing::_)).WillOnce(testing::Return(false)).WillRepeatedly(testing::Return(true));
+  MQUtility::MQUtility* util = new MQUtility::MQUtility("/Users/Zied/Projects/STAR-MQ-Utility/configuration.xml",MQUtility::XML_MODE);
+  util->init();
+  util->setMQClient(&client);
+  int rc = util->checkConfiguration();
+  EXPECT_EQ(rc,-1);
 };

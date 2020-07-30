@@ -2,19 +2,23 @@
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "preLaunchTask": "Build MQChecker (Debug)",
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(lldb) Lancer",
+            "name": "MQChecker (Debug)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bazel-bin/src/main/MQUtility",
-            "args": ["configuration.xml"],
-            "stopAtEntry": true,
-            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/bazel-out/darwin-dbg/bin/src/main/MQChecker",
+            "args": ["${workspaceFolder}/configuration.xml"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/bazel-out/darwin-dbg/bin/src/main/MQChecker.runfiles",
+            "sourceFileMap": {
+              "/var/tmp/_bazel_Zied/b207b04940296aef21ac4e87ffbc5e33/execroot/__main__/": "${workspaceFolder}"
+            },
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb"
-        }
+        },
     ]
 }

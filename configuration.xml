@@ -4,12 +4,12 @@
     <queueManager>DefaultQueueManager</queueManager>
     <queues>
       <queue>
-        <logicalName>Queue11</logicalName>
+        <logicalName>Queue1</logicalName>
         <physicalName>MQQUEUE11</physicalName>
       </queue>
       <queue>
         <logicalName>Queue2</logicalName>
-        <physicalName>MQQUE12</physicalName>
+        <physicalName>MQQUEUE12</physicalName>
       </queue>
     </queues>
   </service>
@@ -18,12 +18,12 @@
     <queueManager>DefaultQueueManager</queueManager>
     <queues>
       <queue>
-        <logicalName>Queue21</logicalName>
+        <logicalName>Queue1</logicalName>
         <physicalName>MQQUEUE21</physicalName>
       </queue>
       <queue>
         <logicalName>Queue2</logicalName>
-        <physicalName>MQQUE22</physicalName>
+        <physicalName>MQQUEUE22</physicalName>
       </queue>
     </queues>
   </service>

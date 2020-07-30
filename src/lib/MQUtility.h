@@ -12,6 +12,11 @@ namespace MQUtility
     REST_API_MODE = 2
   };
 
+  enum MQ_RETURN_CODE {
+    MQ_FAILURE = -1,
+    MQ_SUCCESS = 1,
+  };
+
   class MQUtility {
 
       std::string configurationFile;
@@ -20,8 +25,7 @@ namespace MQUtility
 
       ConfigurationSource* configuration;
       int mode;
-      void init();
-      int checkConfiguration();
+      int  checkConfiguration(std::string const& serviceName);
       void initWithXMLSource();
       void initWithDBSource();
       void initAPISource();
@@ -29,9 +33,10 @@ namespace MQUtility
     public:
       MQUtility(std::string const &filename, int const& mode);
       MQUtility(std::string const &filename, string const& serviceName, int const& mode);
-      MQClient* getMQClient();
+      MQClient* getMQClient() const;
       void setMQClient(MQClient* const& mqClient);
-      int run();
-      void printConfiguration();
+      void init();
+      int  checkConfiguration();
+      void printConfigurationReport(std::string const& service, int const& status) const;
   };
 }

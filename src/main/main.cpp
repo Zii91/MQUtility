@@ -22,5 +22,7 @@ int main(int argc, char *argv[])
     mqUtility = new MQUtility::MQUtility(argv[1],argv[2],MQUtility::XML_MODE);
   }
 
-  mqUtility->run();
+  mqUtility->init();
+  // TODO set MQClientImpl to mqUtility
+  mqUtility->checkConfiguration();
 }

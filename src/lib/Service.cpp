@@ -44,8 +44,13 @@ void Service::addQueue(string const &logicalName, string const &physicalName)
 
 ostream &operator<<(ostream &os, const Service &sc)
 {
-  os << "Service name = " << sc.serviceName << "\n";
-  os << "Queue Manager = " << sc.queueManager << "\n";
-  os << "Queue number  = " << sc.getQueueMap().size() << "\n";
+  os << "Service name       [" << sc.serviceName <<  "]\n";
+  os << "Queue Manager      [" << sc.queueManager << "]\n";
+  os << "Queue Labels/Names [";
+  for (std::pair<std::string, std::string> element : sc.getQueueMap())
+    {
+      os << element.first << " - " << element.second << " | ";
+    }
+  os << "]\n";
   return os;
 }
