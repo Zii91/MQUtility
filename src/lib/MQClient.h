@@ -17,4 +17,5 @@ class MQClient {
     virtual bool rollback(MQConnection *const& mqConnection,std::string const& queue)=0;
     virtual bool closeQueueConnection(MQConnection *const& mqConnection,std::string const& queue)=0;
     virtual bool closeManagerConnection(MQConnection *const& mqConnection)=0;
+    virtual ~MQClient(){};
 };

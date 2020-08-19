@@ -9,16 +9,17 @@
 
 using namespace std;
 
-
 class XMLFileConfiguration: public ConfigurationSource
 {
   string configFile;
-  Service* parseServiceElement(tinyxml2::XMLElement &pElement);
-  vector<Service*> serviceConfigurationVector;
+  vector<shared_ptr<Service>> serviceConfigurationVector;
+  shared_ptr<Service> parseServiceElement(tinyxml2::XMLElement &pElement);
+
 public:
-  XMLFileConfiguration(string const& fileName);
-  void addService(Service* const service) override;
+  ~XMLFileConfiguration();
+  XMLFileConfiguration(string const &fileName);
+  void addService(shared_ptr<Service> const service) override;
   void loadConfiguration() override;
-  Service* getServiceConfiguration(string const& serviceName) override;
-  vector<Service*> getServiceConfigurationVector() override;
+  shared_ptr<Service> getServiceConfiguration(string const &serviceName) override;
+  vector<shared_ptr<Service>> getServiceConfigurationVector() override;
 };

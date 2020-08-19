@@ -56,3 +56,8 @@ bool Service::operator==(const Service &service) const
 {
   return getServiceName() == service.getServiceName() && getQueueManager() == service.getQueueManager();
 }
+
+Service::~Service()
+{
+  mapQueueNameLogicalToPhysical.clear();
+}

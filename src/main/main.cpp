@@ -17,12 +17,12 @@ int main(int argc, char *argv[])
     }
   }
 
-  MQUtility::MQUtility* mqUtility;
+  shared_ptr<MQUtility::MQUtility> mqUtility;
   if (argc == 2)
   {
-    mqUtility  = new MQUtility::MQUtility(argv[1],MQUtility::XML_MODE);
+    mqUtility  = make_shared<MQUtility::MQUtility>(argv[1],MQUtility::XML_MODE);
   }else{
-    mqUtility = new MQUtility::MQUtility(argv[1],argv[2],MQUtility::XML_MODE);
+    mqUtility = make_shared<MQUtility::MQUtility>(argv[1],argv[2],MQUtility::XML_MODE);
   }
 
   mqUtility->init();

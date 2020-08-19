@@ -17,28 +17,23 @@ MQUtility::MQUtility::MQUtility(std::string const &filename, string const &servi
 int MQUtility::MQUtility::checkConfiguration()
 {
   int rc = MQ_SUCCESS;
-  if (mqClient != NULL)
+
+  if (serviceName.length() != 0)
   {
-    std::cout << "here" << std::endl;
-    if (serviceName.length() != 0)
-    {
-      rc = checkConfiguration(serviceName);
-      printConfigurationReport(serviceName, rc);
-    }
-    else
-    {
-      vector<Service *> vs = configuration->getServiceConfigurationVector();
-      for (auto const &service : vs)
-      {
-        const std::string localServiceName = service->getServiceName();
-        rc = rc * checkConfiguration(localServiceName);
-        printConfigurationReport(localServiceName, rc);
-      }
-    }
+    rc = checkConfiguration(serviceName);
+    printConfigurationReport(serviceName, rc);
   }
   else
   {
-    rc = MQ_FAILURE;
+    vector<shared_ptr<Service>> vs{configuration->getServiceConfigurationVector()};
+    for (auto const &service : vs)
+    {
+      const std::string localServiceName = service->getServiceName();
+      int tmpRc = checkConfiguration(localServiceName);
+
+      printConfigurationReport(localServiceName, tmpRc);
+      rc = std::min(rc, tmpRc);
+    }
   }
   return rc;
 };
@@ -57,7 +52,7 @@ void MQUtility::MQUtility::init()
 
 void MQUtility::MQUtility::initWithXMLSource()
 {
-  configuration = new XMLFileConfiguration(configurationFile);
+  configuration = std::unique_ptr<XMLFileConfiguration>(new XMLFileConfiguration(configurationFile));
   try
   {
     configuration->loadConfiguration();
@@ -75,9 +70,9 @@ int MQUtility::MQUtility::checkConfiguration(std::string const &service)
   if (service.length() != 0)
   {
     LOG(INFO) << "Checking MQ Connection for Service = " << service;
-    Service *s{configuration->getServiceConfiguration(service)};
+    shared_ptr<Service> s{configuration->getServiceConfiguration(service)};
     const std::string queueManager{s->getQueueManager()};
-    if (mqClient->initialise(queueManager))
+    if (mqClient && mqClient->initialise(queueManager))
     {
       MQConnection *connection{mqClient->connect(queueManager)};
       if (connection->getReturnCode() != true)
@@ -113,7 +108,7 @@ void MQUtility::MQUtility::printConfigurationReport(std::string const &service, 
 {
   if (service.length() != 0)
   {
-    Service *s{configuration->getServiceConfiguration(service)};
+    shared_ptr<Service> s{configuration->getServiceConfiguration(service)};
     LOG(INFO) << *s;
     if (status == MQ_SUCCESS)
     {
@@ -121,17 +116,17 @@ void MQUtility::MQUtility::printConfigurationReport(std::string const &service, 
     }
     else
     {
-      LOG(ERROR) << "Status [ MQ_FAILURE ]";
+      LOG(INFO) << "Status [ MQ_FAILURE ]";
     }
   }
 };
 
-MQClient *MQUtility::MQUtility::getMQClient() const
+shared_ptr<MQClient> MQUtility::MQUtility::getMQClient() const
 {
   return mqClient;
 };
 
-void MQUtility::MQUtility::setMQClient(MQClient *const &mqClient)
+void MQUtility::MQUtility::setMQClient(shared_ptr<MQClient> const &mqClient)
 {
   this->mqClient = mqClient;
 };
@@ -140,3 +135,5 @@ void MQUtility::MQUtility::setServiceName(string const &serviceName)
 {
   this->serviceName = serviceName;
 };
+
+

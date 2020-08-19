@@ -24,10 +24,10 @@ protected:
 TEST(XMLFileConfigurationShould, ReturnSameService)
 {
   ConfigurationSource* config = new XMLFileConfiguration("");
-  Service* expected = new Service("Service3","DefaultConfiguration");
+  shared_ptr<Service> expected = make_shared<Service>("Service3","DefaultConfiguration");
   config->addService(expected);
-  Service* actual = config->getServiceConfiguration(expected->getServiceName());
-  EXPECT_EQ(*expected,*actual);
+  shared_ptr<Service> actual = config->getServiceConfiguration(expected->getServiceName());
+  EXPECT_EQ(expected,actual);
 };
 
 TEST_F(XMLFileConfigurationInitializationShould, ReturnSameQueueNumberForAServiceFromXMLFile)
@@ -117,95 +117,110 @@ protected:
 
 TEST_F(MQUtilityCheckingShould, accessAllConfigurationQueuesForOneService)
 {
-  testing::NiceMock<MockMQClient> client;
+  shared_ptr<testing::NiceMock<MockMQClient>> client = make_shared<testing::NiceMock<MockMQClient>>();
   srand(time(NULL));
   MQConnection *connection = new MQConnection();
-  ON_CALL(client, initialise(testing::_)).WillByDefault(testing::Return(true));
-  ON_CALL(client, connect(testing::_)).WillByDefault(testing::Return(connection));
-  ON_CALL(client, openQueueConnection(connection, testing::_)).WillByDefault(testing::Return(true));
-  ON_CALL(client, getQueueDepth(connection, testing::_)).WillByDefault(testing::Return(std::make_pair(true, (rand() % 100))));
+  ON_CALL(*client, initialise(testing::_)).WillByDefault(testing::Return(true));
+  ON_CALL(*client, connect(testing::_)).WillByDefault(testing::Return(connection));
+  ON_CALL(*client, openQueueConnection(connection, testing::_)).WillByDefault(testing::Return(true));
+  ON_CALL(*client, getQueueDepth(connection, testing::_)).WillByDefault(testing::Return(std::make_pair(true, (rand() % 100))));
   util->init();
-  util->setMQClient(&client);
+  util->setMQClient(client);
   int rc = util->checkConfiguration();
   EXPECT_EQ(rc, 1);
 };
 
 TEST_F(MQUtilityCheckingShould, cannotInitialiseClient)
 {
-  testing::NiceMock<MockMQClient> client;
-  ON_CALL(client, initialise(testing::_)).WillByDefault(testing::Return(false));
+  shared_ptr<testing::NiceMock<MockMQClient>> client = make_shared<testing::NiceMock<MockMQClient>>();
+  ON_CALL(*client, initialise(testing::_)).WillByDefault(testing::Return(false));
   util->init();
-  util->setMQClient(&client);
+  util->setMQClient(client);
   int rc = util->checkConfiguration();
   EXPECT_EQ(rc, -1);
 };
 
 TEST_F(MQUtilityCheckingShould, cannotConnectClient)
 {
-  testing::NiceMock<MockMQClient> client;
+  shared_ptr<testing::NiceMock<MockMQClient>> client = make_shared<testing::NiceMock<MockMQClient>>();
   MQConnection *connection = new MQConnection();
   connection->setReturnCode(false);
-  ON_CALL(client, initialise(testing::_)).WillByDefault(testing::Return(true));
-  ON_CALL(client, connect(testing::_)).WillByDefault(testing::Return(connection));
+  ON_CALL(*client, initialise(testing::_)).WillByDefault(testing::Return(true));
+  ON_CALL(*client, connect(testing::_)).WillByDefault(testing::Return(connection));
   util->init();
-  util->setMQClient(&client);
+  util->setMQClient(client);
   int rc = util->checkConfiguration();
   EXPECT_EQ(rc, -1);
 };
 
 TEST_F(MQUtilityCheckingShould, cannotOpenConnectionToQueue)
 {
-  testing::NiceMock<MockMQClient> client;
+  shared_ptr<testing::NiceMock<MockMQClient>> client = make_shared<testing::NiceMock<MockMQClient>>();
   MQConnection *connection = new MQConnection();
-  ON_CALL(client, initialise(testing::_)).WillByDefault(testing::Return(true));
-  ON_CALL(client, connect(testing::_)).WillByDefault(testing::Return(connection));
-  ON_CALL(client, openQueueConnection(connection, testing::_)).WillByDefault(testing::Return(false));
+  ON_CALL(*client, initialise(testing::_)).WillByDefault(testing::Return(true));
+  ON_CALL(*client, connect(testing::_)).WillByDefault(testing::Return(connection));
+  ON_CALL(*client, openQueueConnection(connection, testing::_)).WillByDefault(testing::Return(false));
   util->init();
-  util->setMQClient(&client);
+  util->setMQClient(client);
   int rc = util->checkConfiguration();
   EXPECT_EQ(rc, -1);
 };
 
 TEST_F(MQUtilityCheckingShould, cannotOpenConnectionToOneOfTheQueues)
 {
-  testing::NiceMock<MockMQClient> client;
+  shared_ptr<testing::NiceMock<MockMQClient>> client = make_shared<testing::NiceMock<MockMQClient>>();
   MQConnection *connection = new MQConnection();
-  ON_CALL(client, initialise(testing::_)).WillByDefault(testing::Return(true));
-  ON_CALL(client, connect(testing::_)).WillByDefault(testing::Return(connection));
-  EXPECT_CALL(client, openQueueConnection(connection, testing::_)).Times(2).WillOnce(testing::Return(false)).WillOnce(testing::Return(true));
+  ON_CALL(*client, initialise(testing::_)).WillByDefault(testing::Return(true));
+  ON_CALL(*client, connect(testing::_)).WillByDefault(testing::Return(connection));
+  EXPECT_CALL(*client, openQueueConnection(connection, testing::_)).Times(2).WillOnce(testing::Return(false)).WillOnce(testing::Return(true));
   util->init();
-  util->setMQClient(&client);
+  util->setMQClient(client);
   int rc = util->checkConfiguration();
   EXPECT_EQ(rc, -1);
 };
 
 TEST_F(MQUtilityCheckingShould, cannotOpenConnectionToOneOfTheQueues2)
 {
-  testing::NiceMock<MockMQClient> client;
+  shared_ptr<testing::NiceMock<MockMQClient>> client = make_shared<testing::NiceMock<MockMQClient>>();
   MQConnection *connection = new MQConnection();
-  ON_CALL(client, initialise(testing::_)).WillByDefault(testing::Return(true));
-  ON_CALL(client, connect(testing::_)).WillByDefault(testing::Return(connection));
-  EXPECT_CALL(client, openQueueConnection(connection, testing::_)).WillOnce(testing::Return(false)).WillRepeatedly(testing::Return(true));
+  ON_CALL(*client, initialise(testing::_)).WillByDefault(testing::Return(true));
+  ON_CALL(*client, connect(testing::_)).WillByDefault(testing::Return(connection));
+  EXPECT_CALL(*client, openQueueConnection(connection, testing::_)).WillOnce(testing::Return(false)).WillRepeatedly(testing::Return(true));
   util->setServiceName("");
   util->init();
-  util->setMQClient(&client);
+  util->setMQClient(client);
+  int rc = util->checkConfiguration();
+  EXPECT_EQ(rc, -1);
+};
+
+TEST_F(MQUtilityCheckingShould, cannotOpenConnectionToAllQueues)
+{
+  shared_ptr<testing::NiceMock<MockMQClient>> client = make_shared<testing::NiceMock<MockMQClient>>();
+  MQConnection *connection = new MQConnection();
+  ON_CALL(*client, initialise(testing::_)).WillByDefault(testing::Return(true));
+  ON_CALL(*client, connect(testing::_)).WillByDefault(testing::Return(connection));
+  EXPECT_CALL(*client, openQueueConnection(connection, testing::_)).WillRepeatedly(testing::Return(false));
+  util->setServiceName("");
+  util->init();
+  util->setMQClient(client);
   int rc = util->checkConfiguration();
   EXPECT_EQ(rc, -1);
 };
 
 TEST_F(MQUtilityCheckingShould, accessAllConfigurationQueuesForAllServices)
 {
-  testing::NiceMock<MockMQClient> client;
+  shared_ptr<testing::NiceMock<MockMQClient>> client = make_shared<testing::NiceMock<MockMQClient>>();
   srand(time(NULL));
   MQConnection *connection = new MQConnection();
-  ON_CALL(client, initialise(testing::_)).WillByDefault(testing::Return(true));
-  ON_CALL(client, connect(testing::_)).WillByDefault(testing::Return(connection));
-  ON_CALL(client, openQueueConnection(connection, testing::_)).WillByDefault(testing::Return(true));
-  ON_CALL(client, getQueueDepth(connection, testing::_)).WillByDefault(testing::Return(std::make_pair(true, (rand() % 100))));
+  ON_CALL(*client, initialise(testing::_)).WillByDefault(testing::Return(true));
+  ON_CALL(*client, connect(testing::_)).WillByDefault(testing::Return(connection));
+  ON_CALL(*client, openQueueConnection(connection, testing::_)).WillByDefault(testing::Return(true));
+  ON_CALL(*client, getQueueDepth(connection, testing::_)).WillByDefault(testing::Return(std::make_pair(true, (rand() % 100))));
   util->setServiceName("");
   util->init();
-  util->setMQClient(&client);
+  util->setMQClient(client);
   int rc = util->checkConfiguration();
   EXPECT_EQ(rc, 1);
 };
+
 

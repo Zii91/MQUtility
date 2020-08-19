@@ -10,6 +10,11 @@ static const char *XPATH_QUEUE = "queue";
 static const char *XPATH_LOGICAL_NAME = "logicalName";
 static const char *XPATH_PHYSICAL_NAME = "physicalName";
 
+XMLFileConfiguration::~XMLFileConfiguration()
+{
+  serviceConfigurationVector.clear();
+}
+
 XMLFileConfiguration::XMLFileConfiguration(string const &fileName)
 {
   configFile = fileName;
@@ -48,20 +53,21 @@ void XMLFileConfiguration::loadConfiguration()
   while (pListService != nullptr)
   {
     //Parse service node and create new Service object
-    Service *sc{parseServiceElement(*pListService)};
+    shared_ptr<Service> sc{parseServiceElement(*pListService)};
     //Store it into serviceConfigurationVector
-    addService(sc);
+    serviceConfigurationVector.emplace_back(sc);
     //Move to the next node
     pListService = pListService->NextSiblingElement(XPATH_SERVICE);
   }
 }
 
-void XMLFileConfiguration::addService(Service* const service )
+void XMLFileConfiguration::addService(shared_ptr<Service> const service)
 {
+
   serviceConfigurationVector.emplace_back(service);
 }
 
-Service *XMLFileConfiguration::parseServiceElement(tinyxml2::XMLElement &pElement)
+shared_ptr<Service> XMLFileConfiguration::parseServiceElement(tinyxml2::XMLElement &pElement)
 {
   tinyxml2::XMLElement *pServiceNameElement{pElement.FirstChildElement(XPATH_SERVICE_NAME)};
   tinyxml2::XMLElement *pQueueManagerElement{pElement.FirstChildElement(XPATH_QUEUEMANAGER)};
@@ -72,7 +78,7 @@ Service *XMLFileConfiguration::parseServiceElement(tinyxml2::XMLElement &pElemen
   }
   string serviceName = pServiceNameElement->GetText();
   string queueManager = pQueueManagerElement->GetText();
-  Service *sc = new Service(serviceName, queueManager);
+  shared_ptr<Service> sc = make_shared<Service>(serviceName, queueManager);
 
   tinyxml2::XMLElement *queueListElement = pQueuesElement->FirstChildElement(XPATH_QUEUE);
   while (queueListElement != nullptr)
@@ -82,13 +88,13 @@ Service *XMLFileConfiguration::parseServiceElement(tinyxml2::XMLElement &pElemen
     sc->addQueue(queueLogicalName, queuePhysicalName);
     queueListElement = queueListElement->NextSiblingElement(XPATH_QUEUE);
   }
-  return std::move(sc);
+  return sc;
 }
 
-Service *XMLFileConfiguration::getServiceConfiguration(string const &serviceName)
+shared_ptr<Service> XMLFileConfiguration::getServiceConfiguration(string const &serviceName)
 {
   auto const it = find_if(serviceConfigurationVector.begin(),
-                          serviceConfigurationVector.end(), [serviceName](Service *const obj) { return obj->getServiceName() == serviceName; });
+                          serviceConfigurationVector.end(), [serviceName](shared_ptr<Service> const obj) { return obj->getServiceName() == serviceName; });
   if (it != serviceConfigurationVector.end())
   {
     return *it;
@@ -96,7 +102,7 @@ Service *XMLFileConfiguration::getServiceConfiguration(string const &serviceName
   return nullptr;
 }
 
-vector<Service *> XMLFileConfiguration::getServiceConfigurationVector()
+vector<shared_ptr<Service>> XMLFileConfiguration::getServiceConfigurationVector()
 {
   return serviceConfigurationVector;
 }

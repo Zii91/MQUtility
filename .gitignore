@@ -7,3 +7,4 @@ WORKSPACE
 src/lib/BUILD
 src/main/BUILD
 test/BUILD
+logs/
