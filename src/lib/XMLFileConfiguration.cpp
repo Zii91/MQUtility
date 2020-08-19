@@ -2,6 +2,14 @@
 
 using namespace std;
 
+static const char *XPATH_SERVICE = "service";
+static const char *XPATH_SERVICE_NAME = "serviceName";
+static const char *XPATH_QUEUEMANAGER = "queueManager";
+static const char *XPATH_QUEUES = "queues";
+static const char *XPATH_QUEUE = "queue";
+static const char *XPATH_LOGICAL_NAME = "logicalName";
+static const char *XPATH_PHYSICAL_NAME = "physicalName";
+
 XMLFileConfiguration::XMLFileConfiguration(string const &fileName)
 {
   configFile = fileName;
@@ -9,65 +17,78 @@ XMLFileConfiguration::XMLFileConfiguration(string const &fileName)
 
 void XMLFileConfiguration::loadConfiguration()
 {
-  cout << "Loading Configuration from XML file : " << configFile << endl;
+  LOG(INFO) << "Loading Configuration from XML file : " << configFile;
   tinyxml2::XMLDocument xmlDoc;
   tinyxml2::XMLError err = xmlDoc.LoadFile(configFile.c_str());
 
-  if (err == tinyxml2::XML_ERROR_FILE_NOT_FOUND){
-      throw string("ERROR: File not found");
-  }else if (err == tinyxml2::XML_ERROR_FILE_READ_ERROR){
-      throw string("ERROR: Read file error");
-  }else if (err == tinyxml2::XML_ERROR_EMPTY_DOCUMENT){
-      throw string("ERROR: Document empty");
+  if (err == tinyxml2::XML_ERROR_FILE_NOT_FOUND)
+  {
+    throw string("ERROR: File not found");
+  }
+  else if (err == tinyxml2::XML_ERROR_FILE_READ_ERROR)
+  {
+    throw string("ERROR: Read file error");
+  }
+  else if (err == tinyxml2::XML_ERROR_EMPTY_DOCUMENT)
+  {
+    throw string("ERROR: Document empty");
   }
 
   tinyxml2::XMLNode *pRoot = xmlDoc.FirstChild();
   if (pRoot == nullptr)
   {
-    cout << tinyxml2::XML_ERROR_FILE_READ_ERROR << endl;
+    LOG(ERROR) << tinyxml2::XML_ERROR_FILE_READ_ERROR;
   }
 
-  tinyxml2::XMLElement *pListService = pRoot->FirstChildElement("service");
-  if (pListService == nullptr){
+  tinyxml2::XMLElement *pListService = pRoot->FirstChildElement(XPATH_SERVICE);
+  if (pListService == nullptr)
+  {
     throw string("ERROR: Not able to locate Service configuration");
   }
   while (pListService != nullptr)
   {
     //Parse service node and create new Service object
-    Service* sc{parseServiceElement(*pListService)};
+    Service *sc{parseServiceElement(*pListService)};
     //Store it into serviceConfigurationVector
-    serviceConfigurationVector.emplace_back(sc);
+    addService(sc);
     //Move to the next node
-    pListService = pListService->NextSiblingElement("service");
+    pListService = pListService->NextSiblingElement(XPATH_SERVICE);
   }
 }
 
-Service* XMLFileConfiguration::parseServiceElement(tinyxml2::XMLElement &pElement)
+void XMLFileConfiguration::addService(Service* const service )
 {
-  tinyxml2::XMLElement* pServiceNameElement{pElement.FirstChildElement("serviceName")};
-  tinyxml2::XMLElement* pQueueManagerElement{pElement.FirstChildElement("queueManager")};
-  tinyxml2::XMLElement* pQueuesElement{pElement.FirstChildElement("queues")};
-  if (pServiceNameElement == nullptr || pQueueManagerElement == nullptr || pQueuesElement == nullptr){
+  serviceConfigurationVector.emplace_back(service);
+}
+
+Service *XMLFileConfiguration::parseServiceElement(tinyxml2::XMLElement &pElement)
+{
+  tinyxml2::XMLElement *pServiceNameElement{pElement.FirstChildElement(XPATH_SERVICE_NAME)};
+  tinyxml2::XMLElement *pQueueManagerElement{pElement.FirstChildElement(XPATH_QUEUEMANAGER)};
+  tinyxml2::XMLElement *pQueuesElement{pElement.FirstChildElement(XPATH_QUEUES)};
+  if (pServiceNameElement == nullptr || pQueueManagerElement == nullptr || pQueuesElement == nullptr)
+  {
     throw string("ERROR: Some of the mandatory nodes in configuration file are missing");
   }
   string serviceName = pServiceNameElement->GetText();
   string queueManager = pQueueManagerElement->GetText();
-  Service* sc = new Service(serviceName, queueManager);
+  Service *sc = new Service(serviceName, queueManager);
 
-  tinyxml2::XMLElement *queueListElement = pQueuesElement->FirstChildElement("queue");
+  tinyxml2::XMLElement *queueListElement = pQueuesElement->FirstChildElement(XPATH_QUEUE);
   while (queueListElement != nullptr)
   {
-    string queueLogicalName = queueListElement->FirstChildElement("logicalName")->GetText();
-    string queuePhysicalName = queueListElement->FirstChildElement("physicalName")->GetText();
+    string queueLogicalName = queueListElement->FirstChildElement(XPATH_LOGICAL_NAME)->GetText();
+    string queuePhysicalName = queueListElement->FirstChildElement(XPATH_PHYSICAL_NAME)->GetText();
     sc->addQueue(queueLogicalName, queuePhysicalName);
-    queueListElement = queueListElement->NextSiblingElement("queue");
+    queueListElement = queueListElement->NextSiblingElement(XPATH_QUEUE);
   }
   return std::move(sc);
 }
 
-Service* XMLFileConfiguration::getServiceConfiguration(string const& serviceName){
+Service *XMLFileConfiguration::getServiceConfiguration(string const &serviceName)
+{
   auto const it = find_if(serviceConfigurationVector.begin(),
-    serviceConfigurationVector.end(), [serviceName](Service* const  obj) {return obj->getServiceName()==serviceName;});
+                          serviceConfigurationVector.end(), [serviceName](Service *const obj) { return obj->getServiceName() == serviceName; });
   if (it != serviceConfigurationVector.end())
   {
     return *it;
@@ -75,6 +96,7 @@ Service* XMLFileConfiguration::getServiceConfiguration(string const& serviceName
   return nullptr;
 }
 
-vector<Service*> XMLFileConfiguration::getServiceConfigurationVector(){
+vector<Service *> XMLFileConfiguration::getServiceConfigurationVector()
+{
   return serviceConfigurationVector;
 }

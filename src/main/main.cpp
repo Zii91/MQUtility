@@ -1,7 +1,9 @@
 #include "src/lib/MQUtility.h"
-
+#include "glog/logging.h"
 int main(int argc, char *argv[])
 {
+  FLAGS_log_dir ="logs";
+  google::InitGoogleLogging(argv[0]);
   if (argc < 2)
   {
     try
@@ -10,10 +12,11 @@ int main(int argc, char *argv[])
     }
     catch (std::string const &e)
     {
-      cerr << e << endl;
+      LOG(ERROR) << e ;
       return 1;
     }
   }
+
   MQUtility::MQUtility* mqUtility;
   if (argc == 2)
   {
@@ -24,5 +27,6 @@ int main(int argc, char *argv[])
 
   mqUtility->init();
   // TODO set MQClientImpl to mqUtility
+  //mqUtility->setMQClient(new MQClientImpl());
   mqUtility->checkConfiguration();
 }

@@ -24,7 +24,7 @@ public:
   void addQueue(string const &logicalName, string const &physicalName);
 
   map<string, string> getQueueMap() const;
-
+  bool operator == (const Service &service) const;
   friend std::ostream& operator <<(std::ostream&, const Service&);
 };
 

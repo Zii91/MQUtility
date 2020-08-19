@@ -1,6 +1,7 @@
 #pragma once
 #include "XMLFileConfiguration.h"
 #include "MQClient.h"
+#include "MQClientImpl.h"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -35,6 +36,7 @@ namespace MQUtility
       MQUtility(std::string const &filename, string const& serviceName, int const& mode);
       MQClient* getMQClient() const;
       void setMQClient(MQClient* const& mqClient);
+      void setServiceName(string const& service);
       void init();
       int  checkConfiguration();
       void printConfigurationReport(std::string const& service, int const& status) const;
