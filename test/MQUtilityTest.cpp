@@ -5,25 +5,25 @@
 #include <time.h>
 #include "gtest/gtest.h"
 
+//Usage of fixture to refactor Arrangement part and memory management
 class XMLFileConfigurationInitializationShould : public ::testing::Test
 {
 protected:
   void SetUp(string const &fileName)
   {
-    config = new XMLFileConfiguration(fileName);
+    config = std::unique_ptr<XMLFileConfiguration>(new XMLFileConfiguration(fileName));
   }
 
   virtual void TearDown()
   {
-    delete config;
-    config = nullptr;
+
   }
-  ConfigurationSource *config;
+  unique_ptr<ConfigurationSource> config;
 };
 
 TEST(XMLFileConfigurationShould, ReturnSameService)
 {
-  ConfigurationSource* config = new XMLFileConfiguration("");
+  unique_ptr<ConfigurationSource> config = std::unique_ptr<XMLFileConfiguration>(new XMLFileConfiguration(""));
   shared_ptr<Service> expected = make_shared<Service>("Service3","DefaultConfiguration");
   config->addService(expected);
   shared_ptr<Service> actual = config->getServiceConfiguration(expected->getServiceName());
@@ -99,20 +99,20 @@ TEST_F(XMLFileConfigurationInitializationShould, CatchExceptionXMLFileCorrupted)
                std::string);
 };
 
+//Usage of fixture to refactor Arrangement part and memory management
 class MQUtilityCheckingShould : public ::testing::Test
 {
 protected:
   void SetUp()
   {
-    util = new MQUtility::MQUtility("/Users/Zied/Projects/STAR-MQ-Utility/configuration.xml", "Service1", MQUtility::XML_MODE);
+    util = make_shared<MQUtility::MQUtility>("/Users/Zied/Projects/STAR-MQ-Utility/configuration.xml", "Service1", MQUtility::XML_MODE);
   }
 
   virtual void TearDown()
   {
-    delete util;
-    util = nullptr;
+
   }
-  MQUtility::MQUtility *util;
+  shared_ptr<MQUtility::MQUtility> util;
 };
 
 TEST_F(MQUtilityCheckingShould, returnSuccessCodeWhenCanAccessAllConfigurationQueuesForOneService)

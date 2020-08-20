@@ -8,6 +8,8 @@ class Service
 {
   string serviceName;
   string queueManager;
+  //I used a map to store queues logical and physical names
+  // If only physical name should be stored/used a vector could've been better for this case.
   map<string, string> mapQueueNameLogicalToPhysical;
 
 public:

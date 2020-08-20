@@ -2,6 +2,7 @@
 
 using namespace std;
 
+// Constants of XML node names, to ease format upgrade.
 static const char *XPATH_SERVICE = "service";
 static const char *XPATH_SERVICE_NAME = "serviceName";
 static const char *XPATH_QUEUEMANAGER = "queueManager";

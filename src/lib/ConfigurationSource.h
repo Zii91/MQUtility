@@ -2,6 +2,9 @@
 #include <string>
 #include <memory>
 using namespace std;
+
+//Creation of Interface ConfigurationSource as sources are keen to be upgraded
+// XMLFile, Database, API ...
 class ConfigurationSource
 {
   public:
