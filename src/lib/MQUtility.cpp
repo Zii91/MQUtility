@@ -74,8 +74,8 @@ int MQUtility::MQUtility::checkConfiguration(std::string const &service)
     const std::string queueManager{s->getQueueManager()};
     if (mqClient && mqClient->initialise(queueManager))
     {
-      MQConnection *connection{mqClient->connect(queueManager)};
-      if (connection->getReturnCode() != true)
+      shared_ptr<MQConnection> connection{mqClient->connect(queueManager)};
+      if (!connection->getReturnCode())
       {
         rc = MQ_FAILURE;
       }

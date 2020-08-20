@@ -29,7 +29,7 @@ namespace MQUtility
       int  checkConfiguration(std::string const& serviceName);
       void initWithXMLSource();
       void initWithDBSource();
-      void initAPISource();
+      void initWithAPISource();
 
     public:
       MQUtility(std::string const &filename, int const& mode);

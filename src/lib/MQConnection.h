@@ -7,4 +7,5 @@ class MQConnection{
     MQConnection();
     virtual bool getReturnCode() const;
     void setReturnCode(bool const& rc);
+    virtual ~MQConnection(){};
 };

@@ -3,7 +3,7 @@ bazel-out
 bazel-STAR-MQ-Utility
 bazel-testlogs
 WORKSPACE
-.vscode/tasks.json
+.vscode/
 src/lib/BUILD
 src/main/BUILD
 test/BUILD

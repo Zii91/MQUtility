@@ -115,11 +115,11 @@ protected:
   MQUtility::MQUtility *util;
 };
 
-TEST_F(MQUtilityCheckingShould, accessAllConfigurationQueuesForOneService)
+TEST_F(MQUtilityCheckingShould, returnSuccessCodeWhenCanAccessAllConfigurationQueuesForOneService)
 {
   shared_ptr<testing::NiceMock<MockMQClient>> client = make_shared<testing::NiceMock<MockMQClient>>();
   srand(time(NULL));
-  MQConnection *connection = new MQConnection();
+  MQConnection_ptr connection = make_shared<MQConnection>();
   ON_CALL(*client, initialise(testing::_)).WillByDefault(testing::Return(true));
   ON_CALL(*client, connect(testing::_)).WillByDefault(testing::Return(connection));
   ON_CALL(*client, openQueueConnection(connection, testing::_)).WillByDefault(testing::Return(true));
@@ -130,7 +130,8 @@ TEST_F(MQUtilityCheckingShould, accessAllConfigurationQueuesForOneService)
   EXPECT_EQ(rc, 1);
 };
 
-TEST_F(MQUtilityCheckingShould, cannotInitialiseClient)
+
+TEST_F(MQUtilityCheckingShould, returnErrorCodeWhenCannotInitialiseClient)
 {
   shared_ptr<testing::NiceMock<MockMQClient>> client = make_shared<testing::NiceMock<MockMQClient>>();
   ON_CALL(*client, initialise(testing::_)).WillByDefault(testing::Return(false));
@@ -140,10 +141,10 @@ TEST_F(MQUtilityCheckingShould, cannotInitialiseClient)
   EXPECT_EQ(rc, -1);
 };
 
-TEST_F(MQUtilityCheckingShould, cannotConnectClient)
+TEST_F(MQUtilityCheckingShould, returnErrorCodeWhenCannotConnectClient)
 {
   shared_ptr<testing::NiceMock<MockMQClient>> client = make_shared<testing::NiceMock<MockMQClient>>();
-  MQConnection *connection = new MQConnection();
+  MQConnection_ptr connection = make_shared<MQConnection>();
   connection->setReturnCode(false);
   ON_CALL(*client, initialise(testing::_)).WillByDefault(testing::Return(true));
   ON_CALL(*client, connect(testing::_)).WillByDefault(testing::Return(connection));
@@ -153,10 +154,10 @@ TEST_F(MQUtilityCheckingShould, cannotConnectClient)
   EXPECT_EQ(rc, -1);
 };
 
-TEST_F(MQUtilityCheckingShould, cannotOpenConnectionToQueue)
+TEST_F(MQUtilityCheckingShould, returnErrorCodeWhenCannotOpenConnectionToQueue)
 {
   shared_ptr<testing::NiceMock<MockMQClient>> client = make_shared<testing::NiceMock<MockMQClient>>();
-  MQConnection *connection = new MQConnection();
+  MQConnection_ptr connection = make_shared<MQConnection>();
   ON_CALL(*client, initialise(testing::_)).WillByDefault(testing::Return(true));
   ON_CALL(*client, connect(testing::_)).WillByDefault(testing::Return(connection));
   ON_CALL(*client, openQueueConnection(connection, testing::_)).WillByDefault(testing::Return(false));
@@ -166,10 +167,10 @@ TEST_F(MQUtilityCheckingShould, cannotOpenConnectionToQueue)
   EXPECT_EQ(rc, -1);
 };
 
-TEST_F(MQUtilityCheckingShould, cannotOpenConnectionToOneOfTheQueues)
+TEST_F(MQUtilityCheckingShould, returnErrorCodeWhenCannotOpenConnectionToOneOfTheQueues)
 {
   shared_ptr<testing::NiceMock<MockMQClient>> client = make_shared<testing::NiceMock<MockMQClient>>();
-  MQConnection *connection = new MQConnection();
+  MQConnection_ptr connection = make_shared<MQConnection>();
   ON_CALL(*client, initialise(testing::_)).WillByDefault(testing::Return(true));
   ON_CALL(*client, connect(testing::_)).WillByDefault(testing::Return(connection));
   EXPECT_CALL(*client, openQueueConnection(connection, testing::_)).Times(2).WillOnce(testing::Return(false)).WillOnce(testing::Return(true));
@@ -179,10 +180,10 @@ TEST_F(MQUtilityCheckingShould, cannotOpenConnectionToOneOfTheQueues)
   EXPECT_EQ(rc, -1);
 };
 
-TEST_F(MQUtilityCheckingShould, cannotOpenConnectionToOneOfTheQueues2)
+TEST_F(MQUtilityCheckingShould, returnErrorCodeWhenCannotOpenConnectionToOneOfTheQueuesForOneService)
 {
   shared_ptr<testing::NiceMock<MockMQClient>> client = make_shared<testing::NiceMock<MockMQClient>>();
-  MQConnection *connection = new MQConnection();
+  MQConnection_ptr connection = make_shared<MQConnection>();
   ON_CALL(*client, initialise(testing::_)).WillByDefault(testing::Return(true));
   ON_CALL(*client, connect(testing::_)).WillByDefault(testing::Return(connection));
   EXPECT_CALL(*client, openQueueConnection(connection, testing::_)).WillOnce(testing::Return(false)).WillRepeatedly(testing::Return(true));
@@ -193,10 +194,10 @@ TEST_F(MQUtilityCheckingShould, cannotOpenConnectionToOneOfTheQueues2)
   EXPECT_EQ(rc, -1);
 };
 
-TEST_F(MQUtilityCheckingShould, cannotOpenConnectionToAllQueues)
+TEST_F(MQUtilityCheckingShould, returnErrorCodeWhenCannotOpenConnectionToAllQueues)
 {
   shared_ptr<testing::NiceMock<MockMQClient>> client = make_shared<testing::NiceMock<MockMQClient>>();
-  MQConnection *connection = new MQConnection();
+  MQConnection_ptr connection = make_shared<MQConnection>();
   ON_CALL(*client, initialise(testing::_)).WillByDefault(testing::Return(true));
   ON_CALL(*client, connect(testing::_)).WillByDefault(testing::Return(connection));
   EXPECT_CALL(*client, openQueueConnection(connection, testing::_)).WillRepeatedly(testing::Return(false));
@@ -207,11 +208,11 @@ TEST_F(MQUtilityCheckingShould, cannotOpenConnectionToAllQueues)
   EXPECT_EQ(rc, -1);
 };
 
-TEST_F(MQUtilityCheckingShould, accessAllConfigurationQueuesForAllServices)
+TEST_F(MQUtilityCheckingShould, returnSuccessCodeWhenCanAccessAllConfigurationQueuesForAllServices)
 {
   shared_ptr<testing::NiceMock<MockMQClient>> client = make_shared<testing::NiceMock<MockMQClient>>();
   srand(time(NULL));
-  MQConnection *connection = new MQConnection();
+  MQConnection_ptr connection = make_shared<MQConnection>();
   ON_CALL(*client, initialise(testing::_)).WillByDefault(testing::Return(true));
   ON_CALL(*client, connect(testing::_)).WillByDefault(testing::Return(connection));
   ON_CALL(*client, openQueueConnection(connection, testing::_)).WillByDefault(testing::Return(true));
@@ -223,4 +224,11 @@ TEST_F(MQUtilityCheckingShould, accessAllConfigurationQueuesForAllServices)
   EXPECT_EQ(rc, 1);
 };
 
+TEST_F(MQUtilityCheckingShould, returnErrorCodeWhenMQClientIsNull)
+{
+  util->setServiceName("");
+  util->init();
+  int rc = util->checkConfiguration();
+  EXPECT_EQ(rc, -1);
+};
 
